@@ -8,9 +8,9 @@
     android:background="@color/white">
 
     <LinearLayout
-        android:id="@+id/taskRow1"
+        android:id="@+id/taskRow3"
         android:layout_width="316dp"
-        android:layout_height="25dp"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="20dp"
@@ -19,7 +19,7 @@
         app:layout_constraintHorizontal_bias="0.126"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.487">
+        app:layout_constraintVertical_bias="0.467">
 
         <ImageView
             android:layout_width="14dp"
@@ -43,9 +43,9 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/taskRow2"
+        android:id="@+id/taskRow1"
         android:layout_width="316dp"
-        android:layout_height="25dp"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="20dp"
@@ -54,7 +54,7 @@
         app:layout_constraintHorizontal_bias="0.126"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.426">
+        app:layout_constraintVertical_bias="0.366">
 
         <ImageView
             android:layout_width="14dp"
@@ -83,11 +83,11 @@
         android:layout_height="66dp"
         android:fontFamily="@font/inter"
         android:gravity="left|center_vertical"
-        android:paddingStart="16dp"
+        android:paddingStart="24dp"
         android:text="Add new task"
         android:textAllCaps="false"
         android:textColor="@color/black"
-        android:textSize="16sp"
+        android:textSize="17sp"
         app:backgroundTint="@color/button_blue"
         app:cornerRadius="15dp"
         app:icon="@drawable/add_icon"
@@ -118,17 +118,33 @@
         app:layout_constraintVertical_bias="0.083" />
 
     <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="81dp"
-        android:layout_height="58dp"
-        android:rotation="180"
-        android:src="@drawable/dialog_icon"
+        android:id="@+id/ivPurrfectDialog"
+        android:layout_width="75dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/purrfect_dialog"
+        android:visibility="invisible"
+        android:adjustViewBounds="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/imageView5"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.96"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.19" />
+        app:layout_constraintVertical_bias="0.16" />
+
+    <TextView
+        android:id="@+id/tvDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/inter"
+        android:text="27th of Jan, 2025"
+        android:textColor="@color/button_blue"
+        android:textSize="13sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.109"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.247" />
 
     <TextView
         android:id="@+id/tvTodoHeader"
@@ -145,25 +161,10 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.284" />
 
-    <TextView
-        android:id="@+id/tvDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/inter"
-        android:text="27th of Jan, 2025"
-        android:textColor="@color/button_blue"
-        android:textSize="13dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.109"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.247" />
-
     <LinearLayout
-        android:id="@+id/taskRow3"
+        android:id="@+id/taskRow2"
         android:layout_width="316dp"
-        android:layout_height="25dp"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="20dp"
@@ -172,7 +173,7 @@
         app:layout_constraintHorizontal_bias="0.126"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.366">
+        app:layout_constraintVertical_bias="0.415">
 
         <ImageView
             android:layout_width="14dp"
@@ -207,42 +208,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.901" />
 
-    <ImageView
-        android:id="@+id/btnLogout"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
-        android:src="@drawable/logout_icon"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.04"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.977" />
-
-    <ImageView
-        android:id="@+id/btnSettings"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
-        android:src="@drawable/settings_icon"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.959"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.977" />
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="44dp"
-        android:layout_height="13dp"
-        android:text="purrrrrfect!"
-        android:fontFamily="@font/inter"
-        android:textSize="9dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.91"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.217" />
+    <ImageView android:id="@+id/btnLogout" android:layout_width="24dp" android:layout_height="24dp" android:layout_margin="24dp" android:src="@drawable/logout_icon" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <ImageView android:id="@+id/btnSettings" android:layout_width="24dp" android:layout_height="24dp" android:layout_margin="24dp" android:src="@drawable/settings_icon" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/mainPanel"
+        android:layout_width="339dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/panel_task_background"
+        android:padding="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/btnSave"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed">
+
+        <TextView
+            android:id="@+id/tvHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/rubik_bubbles"
+            android:text="NEW MEOW-SSION"
+            android:textColor="@color/white"
+            android:textSize="28sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/lblTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/inter"
+            android:text="Title"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvHeader" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/etTitle"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field_bg"
+            android:backgroundTint="@null"
+            android:fontFamily="@font/inter"
+            android:hint="One task closer to purrfection!"
+            android:paddingStart="12dp"
+            android:textColor="@color/black"
+            android:textSize="10sp"
+            app:layout_constraintTop_toBottomOf="@id/lblTitle"
+            tools:layout_editor_absoluteX="20dp" />
+
+        <TextView
+            android:id="@+id/lblDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:fontFamily="@font/inter"
+            android:text="Description"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/etTitle" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/etDesc"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field_bg"
+            android:backgroundTint="@null"
+            android:fontFamily="@font/inter"
+            android:gravity="top"
+            android:hint="Details now, less chaos in your catnap later."
+            android:padding="12dp"
+            android:textColor="@color/black"
+            android:textSize="10sp"
+            app:layout_constraintTop_toBottomOf="@id/lblDesc"
+            tools:layout_editor_absoluteX="20dp" />
+
+        <TextView
+            android:id="@+id/lblDateTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:fontFamily="@font/inter"
+            android:text="Date and Time"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/etDesc" />
+
+        <LinearLayout
+            android:id="@+id/dateTimeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/lblDateTime">
+
+            <TextView
+                android:id="@+id/tvDateSelect"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:background="@drawable/date_time_field_bg"
+                android:fontFamily="@font/inter"
+                android:gravity="center"
+                android:paddingHorizontal="12dp"
+                android:text="Apr 1, 2025"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/tvTimeSelect"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/date_time_field_bg"
+                android:fontFamily="@font/inter"
+                android:gravity="center"
+                android:paddingHorizontal="12dp"
+                android:text="9:41 AM"
+                android:textColor="@color/black" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/lblStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:fontFamily="@font/inter"
+            android:text="Status"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dateTimeLayout" />
+
+        <RelativeLayout
+            android:id="@+id/statusContainer"
+            android:layout_width="200dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/input_field_bg"
+            android:backgroundTint="@null"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lblStatus">
+
+            <Spinner
+                android:id="@+id/statusSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="3dp"
+                android:background="@drawable/spinner_white_bg"
+                android:overlapAnchor="false"
+                android:spinnerMode="dropdown" />
+
+            <ImageView
+                android:id="@+id/ivArrow"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="15dp"
+                android:src="@drawable/ic_arrow_down"
+                android:elevation="10dp"
+                app:tint="@color/black" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/lblNotify"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:fontFamily="@font/inter"
+            android:text="Notify me!"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/statusContainer" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switchNotify"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lblNotify"
+            app:thumbTint="@color/black"
+            app:trackTint="@color/black" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSave"
+        android:layout_width="280dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="40dp"
+        android:fontFamily="@font/rubik_bubbles"
+        android:text="SAVE"
+        android:textColor="@color/white"
+        android:textSize="28sp"
+        app:backgroundTint="@color/button_blue"
+        app:cornerRadius="14dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mainPanel"
+        app:strokeColor="@color/black"
+        app:strokeWidth="1dp" />
+
+    <ImageView android:id="@+id/btnLogout" android:layout_width="24dp" android:layout_height="24dp" android:layout_margin="24dp" android:src="@drawable/logout_icon" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <ImageView android:id="@+id/btnSettings" android:layout_width="24dp" android:layout_height="24dp" android:layout_margin="24dp" android:src="@drawable/settings_icon" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" />
+    <ImageView android:layout_width="35dp" android:layout_height="35dp" android:layout_marginStart="-15dp" android:layout_marginTop="-15dp" android:rotation="-60" android:src="@drawable/paw_icon" android:elevation="5dp" app:layout_constraintStart_toStartOf="@id/mainPanel" app:layout_constraintTop_toTopOf="@id/mainPanel" />
+    <ImageView android:layout_width="83dp" android:layout_height="80dp" android:layout_marginEnd="-15dp" android:layout_marginBottom="-35dp" android:src="@drawable/small_cat_icon" android:elevation="5dp" app:layout_constraintBottom_toBottomOf="@id/mainPanel" app:layout_constraintEnd_toEndOf="@id/mainPanel" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
