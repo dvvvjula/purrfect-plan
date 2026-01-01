@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:paddingBottom="0dp"
+    android:background="@drawable/custom_checkbox_shape"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal">
+
+    <TextView
+        android:id="@+id/tvMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Are you sure you want to delete this task?"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:fontFamily="@font/inter"
+        android:gravity="center"
+        android:textAlignment="center" />
+
+    <!-- KONTENER Z PRZYCISKAMI (bez kotka) -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnNo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No"
+            android:textColor="@color/black"
+            android:fontFamily="@font/inter"
+            style="@style/Widget.Material3.Button"
+            app:backgroundTint="@color/button_blue"
+            app:strokeColor="@color/black"
+            app:strokeWidth="1dp"
+            app:cornerRadius="12dp"
+            android:minHeight="44dp"
+            android:layout_marginEnd="8dp" />
+
+        <ImageView
+            android:id="@+id/ivCat"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="-32dp"
+            android:layout_marginBottom="-32dp"
+            android:elevation="4dp"
+            android:src="@drawable/about_app_icon" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnYes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Yes"
+            android:textColor="@color/black"
+            android:fontFamily="@font/inter"
+            style="@style/Widget.Material3.Button"
+            app:backgroundTint="@color/button_blue"
+            app:strokeColor="@color/black"
+            app:strokeWidth="1dp"
+            app:cornerRadius="12dp"
+            android:minHeight="44dp"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
+
+    <!-- KOTEK WCHYLAJĄCY SIĘ Z DOŁU (nie w kontenerze) -->
+
+</LinearLayout>
+
+

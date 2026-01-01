@@ -1,15 +1,18 @@
 package com.example.purrfectplan;
 
 import android.content.Intent;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.purrfectplan.room.AppDatabase;
 import com.example.purrfectplan.room.TaskDao;
@@ -22,7 +25,8 @@ import java.util.Locale;
 
 public class TaskListActivity extends AppCompatActivity {
 
-    private LinearLayout todayTasksContainer;
+    private RecyclerView rvTodayTasks;
+    private TasksAdapter tasksAdapter;
     private TaskDao taskDao;
 
     @Override
@@ -30,25 +34,27 @@ public class TaskListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_list);
 
-        todayTasksContainer = findViewById(R.id.todayTasksContainer);
+        rvTodayTasks = findViewById(R.id.rvTodayTasks);
+        rvTodayTasks.setLayoutManager(new LinearLayoutManager(this));
 
-        // Inicjalizacja Room
         taskDao = AppDatabase.getInstance(this).taskDao();
 
-        // Wyświetlenie dzisiejszych tasków
+        tasksAdapter = new TasksAdapter(this, new java.util.ArrayList<>(), taskDao);
+        rvTodayTasks.setAdapter(tasksAdapter);
+
+        attachSwipeToDelete(rvTodayTasks);
+
         loadTasksForToday();
 
-        // Przycisk Add
         findViewById(R.id.btnAdd).setOnClickListener(v ->
                 startActivity(new Intent(this, NewTaskActivity.class)));
 
-        // Footer
         findViewById(R.id.btnLogout).setOnClickListener(v ->
                 startActivity(new Intent(this, MainActivity.class)));
+
         findViewById(R.id.btnSettings).setOnClickListener(v ->
                 startActivity(new Intent(this, SettingsActivity.class)));
 
-        // Ustaw dzisiejszą datę
         TextView tvDate = findViewById(R.id.tvDate);
         String today = new SimpleDateFormat("d'th of' MMM, yyyy", Locale.ENGLISH)
                 .format(Calendar.getInstance().getTime());
@@ -56,9 +62,6 @@ public class TaskListActivity extends AppCompatActivity {
     }
 
     private void loadTasksForToday() {
-        todayTasksContainer.removeAllViews();
-
-        // Zakres timestampów dla dzisiejszego dnia
         Calendar start = Calendar.getInstance();
         start.set(Calendar.HOUR_OF_DAY, 0);
         start.set(Calendar.MINUTE, 0);
@@ -71,57 +74,72 @@ public class TaskListActivity extends AppCompatActivity {
         end.set(Calendar.SECOND, 59);
         end.set(Calendar.MILLISECOND, 999);
 
-        // Pobranie tasków z Room
-        List<TaskEntity> tasks = taskDao.getTasksForToday(start.getTimeInMillis(), end.getTimeInMillis());
+        List<TaskEntity> tasks = taskDao.getTasksForToday(
+                start.getTimeInMillis(),
+                end.getTimeInMillis()
+        );
 
-        for (TaskEntity task : tasks) {
-            View taskView = LayoutInflater.from(this)
-                    .inflate(R.layout.item_task, todayTasksContainer, false);
-
-            TextView tvTitle = taskView.findViewById(R.id.tvTitle);
-            ImageView checkbox = taskView.findViewById(R.id.checkbox);
-            ImageView ivEdit = taskView.findViewById(R.id.ivEditTask);
-
-            tvTitle.setText(task.title);
-
-            // --- Ustawienie checkboxa / paw i przekreślenia ---
-            if ("completed".equals(task.status)) {
-                tvTitle.setPaintFlags(tvTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                checkbox.setImageResource(R.drawable.paw_icon);
-            } else {
-                tvTitle.setPaintFlags(tvTitle.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                checkbox.setImageResource(R.drawable.custom_checkbox_shape);
-            }
-
-            // --- Kliknięcie checkbox / paw ---
-            checkbox.setOnClickListener(v -> {
-                if ("completed".equals(task.status)) {
-                    task.status = "not finished";
-                    tvTitle.setPaintFlags(tvTitle.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                    checkbox.setImageResource(R.drawable.custom_checkbox_shape);
-                } else {
-                    task.status = "completed";
-                    tvTitle.setPaintFlags(tvTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                    checkbox.setImageResource(R.drawable.paw_icon);
-                }
-                taskDao.update(task);
-            });
-
-            // --- Kliknięcie w trzy kropki -> edycja ---
-            ivEdit.setOnClickListener(v -> {
-                Intent intent = new Intent(this, EditTaskActivity.class);
-                intent.putExtra("taskId", task.id);
-                startActivity(intent);
-            });
-
-            todayTasksContainer.addView(taskView);
-        }
+        tasksAdapter.setTasks(tasks);
     }
+
+    private void attachSwipeToDelete(RecyclerView recyclerView) {
+        ItemTouchHelper.SimpleCallback simpleCallback =
+                new ItemTouchHelper.SimpleCallback(0,
+                        ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+                    @Override
+                    public boolean onMove(@NonNull RecyclerView recyclerView,
+                                          @NonNull RecyclerView.ViewHolder viewHolder,
+                                          @NonNull RecyclerView.ViewHolder target) {
+                        return false;
+                    }
+
+                    @Override
+                    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                        int position = viewHolder.getAdapterPosition();
+                        TaskEntity task = tasksAdapter.getTaskAt(position);
+                        showDeleteDialog(task, position);
+                    }
+                };
+
+        new ItemTouchHelper(simpleCallback).attachToRecyclerView(recyclerView);
+    }
+
+    private void showDeleteDialog(TaskEntity task, int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_delete_task, null);
+        builder.setView(view);
+
+        AlertDialog dialog = builder.create();
+
+        // USUŃ BIAŁE TŁO + DOROBIENIE ROGÓW
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.getWindow().getDecorView().setPadding(0, 0, 0, 0);
+
+        Button btnYes = view.findViewById(R.id.btnYes);
+        Button btnNo = view.findViewById(R.id.btnNo);
+
+        btnYes.setOnClickListener(v -> {
+            taskDao.delete(task);
+            tasksAdapter.removeAt(position);
+            dialog.dismiss();
+        });
+
+        btnNo.setOnClickListener(v -> {
+            tasksAdapter.notifyItemChanged(position);
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadTasksForToday(); // odśwież po powrocie z NewTaskActivity/EditTaskActivity
+        loadTasksForToday();
     }
 }
+
 
