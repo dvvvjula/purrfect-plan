@@ -1,6 +1,8 @@
 package com.example.purrfectplan;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -65,11 +67,11 @@ public class SettingsActivity extends AppCompatActivity {
 
         // 5. Obsługa Switcha Powiadomień
         switchNotifications.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // Zapisujemy stan w pamięci telefonu
             sharedPreferences.edit().putBoolean("notifications_enabled", isChecked).apply();
 
             if (isChecked) {
                 requestNotificationPermission();
+                createNotificationChannel();  // DODANE!
             }
         });
 
@@ -119,4 +121,18 @@ public class SettingsActivity extends AppCompatActivity {
             }
         }
     }
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = "task_channel";
+            CharSequence name = "Task Reminders";
+            String description = "Purrfect task notifications";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(channelId, name, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
 }

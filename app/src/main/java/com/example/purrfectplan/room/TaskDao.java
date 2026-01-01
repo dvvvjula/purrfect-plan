@@ -13,7 +13,7 @@ import java.util.List;
 public interface TaskDao {
 
     @Insert
-    void insert(TaskEntity task);
+    long insert(TaskEntity task);
 
     @Update
     void update(TaskEntity task);

@@ -28,6 +28,25 @@ public class TaskListActivity extends AppCompatActivity {
     private RecyclerView rvTodayTasks;
     private TasksAdapter tasksAdapter;
     private TaskDao taskDao;
+    private String formatTodayDate() {
+        Calendar cal = Calendar.getInstance();
+        int day = cal.get(Calendar.DAY_OF_MONTH);
+        String ordinal = getOrdinalSuffix(day);
+
+        SimpleDateFormat sdfBase = new SimpleDateFormat("d 'of' MMM, yyyy", Locale.ENGLISH);
+        String baseDate = sdfBase.format(cal.getTime());
+        return baseDate.replaceFirst("\\d+ ", day + ordinal + " ");
+    }
+
+    private String getOrdinalSuffix(int day) {
+        if (day >= 11 && day <= 13) return "th";
+        switch (day % 10) {
+            case 1: return "st";
+            case 2: return "nd";
+            case 3: return "rd";
+            default: return "th";
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +75,7 @@ public class TaskListActivity extends AppCompatActivity {
                 startActivity(new Intent(this, SettingsActivity.class)));
 
         TextView tvDate = findViewById(R.id.tvDate);
-        String today = new SimpleDateFormat("d'th of' MMM, yyyy", Locale.ENGLISH)
-                .format(Calendar.getInstance().getTime());
-        tvDate.setText(today);
+        tvDate.setText(formatTodayDate());
     }
 
     private void loadTasksForToday() {

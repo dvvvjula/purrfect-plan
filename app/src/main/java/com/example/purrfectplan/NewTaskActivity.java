@@ -1,9 +1,13 @@
 package com.example.purrfectplan;
 
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -22,12 +26,13 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
-
 import com.example.purrfectplan.room.AppDatabase;
 import com.example.purrfectplan.room.TaskEntity;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class NewTaskActivity extends AppCompatActivity {
 
@@ -38,21 +43,34 @@ public class NewTaskActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_task);
 
-        // --- 1. WYBÓR DATY I GODZINY ---
+        // 1. DATE/TIME PICKERS
         TextView tvDate = findViewById(R.id.tvDateSelect);
         tvDate.setOnClickListener(v -> showDatePicker(tvDate));
 
         TextView tvTime = findViewById(R.id.tvTimeSelect);
         tvTime.setOnClickListener(v -> showTimePicker(tvTime));
 
-        // --- 2. KONFIGURACJA SPINNERA STATUSU ---
+        // 2. STATUS SPINNER
         Spinner spinner = findViewById(R.id.statusSpinner);
         setupStatusSpinner(spinner);
 
-        // --- 3. PRZYCISK SAVE ---
+        // 3. NOTIFY SWITCH + LISTENER (NOWE!)
+        SwitchCompat switchNotify = findViewById(R.id.switchNotify);
+        switchNotify.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences prefs = getSharedPreferences("PurrfectPrefs", MODE_PRIVATE);
+            boolean globalNotificationsEnabled = prefs.getBoolean("notifications_enabled", false);
+
+            if (isChecked && !globalNotificationsEnabled) {
+                Toast.makeText(NewTaskActivity.this, "You have to turn notifications ON in app Settings first! Meow.", Toast.LENGTH_LONG).show();
+                switchNotify.setChecked(false);
+                return;
+            }
+        });
+
+        // 4. SAVE BUTTON
         findViewById(R.id.btnSave).setOnClickListener(v -> saveTaskToRoom());
 
-        // --- 4. NAWIGACJA FOOTER ---
+        // 5. FOOTER NAVIGATION
         findViewById(R.id.btnLogout).setOnClickListener(v -> {
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
@@ -88,18 +106,12 @@ public class NewTaskActivity extends AppCompatActivity {
         StatusAdapter adapter = new StatusAdapter(this, statusNames);
         spinner.setAdapter(adapter);
 
-        // Dodaj to pod setupStatusSpinner(spinner);
         ImageView ivArrow = findViewById(R.id.ivArrow);
         ivArrow.setOnClickListener(v -> spinner.performClick());
-
-// Wymuszenie białego tła listy rozwijanej
         spinner.setPopupBackgroundResource(android.R.color.white);
     }
 
-
     private void saveTaskToRoom() {
-
-        // 1. Pobranie tekstu z pól
         EditText etTitle = findViewById(R.id.etTitle);
         EditText etDesc = findViewById(R.id.etDesc);
         Spinner spinner = findViewById(R.id.statusSpinner);
@@ -110,31 +122,58 @@ public class NewTaskActivity extends AppCompatActivity {
         String status = spinner.getSelectedItem().toString();
         boolean notify = switchNotify.isChecked();
 
-        // 2. Data i godzina (z Calendar) – zapisujemy jako long
         long dateTime = selectedDateTime.getTimeInMillis();
 
-        // 3. Tworzenie obiektu TaskEntity
         TaskEntity task = new TaskEntity();
         task.title = title;
         task.description = description;
-        task.dateTime = dateTime; // <-- używamy dateTime zamiast date + time
+        task.dateTime = dateTime;
         task.status = status;
         task.notify = notify;
 
-        // 4. Zapis do Room
+        // Insert (void DAO)
         AppDatabase.getInstance(this).taskDao().insert(task);
 
-        // 5. Info + powrót
-        Toast.makeText(this, "Task saved 🐾", Toast.LENGTH_SHORT).show();
+        // Fake ID dla PendingIntent
+        task.id = (int) (System.currentTimeMillis() % 100000);
+
+        // Sprawdź globalne ustawienia PRZED planowaniem
+        SharedPreferences prefs = getSharedPreferences("PurrfectPrefs", MODE_PRIVATE);
+        boolean globalNotifyEnabled = prefs.getBoolean("notifications_enabled", false);
+
+        if (notify && globalNotifyEnabled) {
+            scheduleNotification(task);
+        }
+
+        Toast.makeText(this, "Task saved!", Toast.LENGTH_SHORT).show();
         finish();
     }
 
+    private void scheduleNotification(TaskEntity task) {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, NotificationReceiver.class);
+        intent.putExtra("task_id", task.id);
+        intent.putExtra("task_title", task.title);
+        intent.putExtra("task_description", task.description);
+        intent.putExtra("task_time", new SimpleDateFormat("h:mm a", Locale.ENGLISH).format(new Date(task.dateTime)));
 
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, task.id, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-    // ADAPTER JAKO KLASA WEWNĘTRZNA (Poprawiona)
+        long triggerTime = task.dateTime;
+        if (triggerTime <= System.currentTimeMillis()) {
+            triggerTime += 24 * 60 * 60 * 1000L;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+        } else {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+        }
+    }
+
+    // StatusAdapter bez zmian
     public class StatusAdapter extends ArrayAdapter<String> {
         private final String[] titles;
-        // Upewnij się, że te nazwy drawable są poprawne w Twoim projekcie!
         private final int[] images = {
                 R.drawable.not_finished_icon,
                 R.drawable.in_process_icon,
@@ -170,13 +209,9 @@ public class NewTaskActivity extends AppCompatActivity {
             LinearLayout layout = (LinearLayout) row;
 
             if (parent instanceof Spinner) {
-                // WIDOK W RAMCE:
-                // Ustawiamy mały padding z lewej strony, aby ikonka nie dotykała linii obramowania
                 layout.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
                 row.setPadding(10, 0, 0, 0);
             } else {
-                // WIDOK NA LIŚCIE:
-                // Większe odstępy, żeby lista wyglądała na czystą i przestronną
                 layout.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
                 row.setPadding(20, 20, 0, 20);
             }
