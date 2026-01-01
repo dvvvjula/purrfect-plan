@@ -1,112 +1,127 @@
 package com.example.purrfectplan;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.os.Handler;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.purrfectplan.room.AppDatabase;
+import com.example.purrfectplan.room.TaskDao;
+import com.example.purrfectplan.room.TaskEntity;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class TaskListActivity extends AppCompatActivity {
+
+    private LinearLayout todayTasksContainer;
+    private TaskDao taskDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_list);
 
-        // --- 1. USTAWIANIE AKTUALNEJ DATY ---
+        todayTasksContainer = findViewById(R.id.todayTasksContainer);
+
+        // Inicjalizacja Room
+        taskDao = AppDatabase.getInstance(this).taskDao();
+
+        // Wyświetlenie dzisiejszych tasków
+        loadTasksForToday();
+
+        // Przycisk Add
+        findViewById(R.id.btnAdd).setOnClickListener(v ->
+                startActivity(new Intent(this, NewTaskActivity.class)));
+
+        // Footer
+        findViewById(R.id.btnLogout).setOnClickListener(v ->
+                startActivity(new Intent(this, MainActivity.class)));
+        findViewById(R.id.btnSettings).setOnClickListener(v ->
+                startActivity(new Intent(this, SettingsActivity.class)));
+
+        // Ustaw dzisiejszą datę
         TextView tvDate = findViewById(R.id.tvDate);
-        tvDate.setText(getFormattedDate());
+        String today = new SimpleDateFormat("d'th of' MMM, yyyy", Locale.ENGLISH)
+                .format(Calendar.getInstance().getTime());
+        tvDate.setText(today);
+    }
 
-        // --- 2. NAWIGACJA (LOGOUT I SETTINGS) ---
-        findViewById(R.id.btnLogout).setOnClickListener(v -> {
-            Intent intent = new Intent(TaskListActivity.this, MainActivity.class);
-            startActivity(intent);
-        });
+    private void loadTasksForToday() {
+        todayTasksContainer.removeAllViews();
 
-        findViewById(R.id.btnSettings).setOnClickListener(v -> {
-            Intent intent = new Intent(TaskListActivity.this, SettingsActivity.class);
-            startActivity(intent);
-        });
+        // Zakres timestampów dla dzisiejszego dnia
+        Calendar start = Calendar.getInstance();
+        start.set(Calendar.HOUR_OF_DAY, 0);
+        start.set(Calendar.MINUTE, 0);
+        start.set(Calendar.SECOND, 0);
+        start.set(Calendar.MILLISECOND, 0);
 
-        // --- 3. ADD NEW TASK (Z TWOIM OBRAZKIEM Z FIGMY) ---
-        View btnAdd = findViewById(R.id.btnAdd);
-        // Teraz szukamy tylko jednego obrazka ivPurrfectDialog
-        ImageView purrfectDialog = findViewById(R.id.ivPurrfectDialog);
+        Calendar end = Calendar.getInstance();
+        end.set(Calendar.HOUR_OF_DAY, 23);
+        end.set(Calendar.MINUTE, 59);
+        end.set(Calendar.SECOND, 59);
+        end.set(Calendar.MILLISECOND, 999);
 
-        btnAdd.setOnClickListener(v -> {
-            if (purrfectDialog != null) {
-                purrfectDialog.setVisibility(View.VISIBLE);
+        // Pobranie tasków z Room
+        List<TaskEntity> tasks = taskDao.getTasksForToday(start.getTimeInMillis(), end.getTimeInMillis());
+
+        for (TaskEntity task : tasks) {
+            View taskView = LayoutInflater.from(this)
+                    .inflate(R.layout.item_task, todayTasksContainer, false);
+
+            TextView tvTitle = taskView.findViewById(R.id.tvTitle);
+            ImageView checkbox = taskView.findViewById(R.id.checkbox);
+            ImageView ivEdit = taskView.findViewById(R.id.ivEditTask);
+
+            tvTitle.setText(task.title);
+
+            // --- Ustawienie checkboxa / paw i przekreślenia ---
+            if ("completed".equals(task.status)) {
+                tvTitle.setPaintFlags(tvTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                checkbox.setImageResource(R.drawable.paw_icon);
+            } else {
+                tvTitle.setPaintFlags(tvTitle.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                checkbox.setImageResource(R.drawable.custom_checkbox_shape);
             }
 
-            // Czekamy 800ms, żeby użytkownik zobaczył dymek, potem idziemy dalej
-            new Handler().postDelayed(() -> {
-                Intent intent = new Intent(TaskListActivity.this, NewTaskActivity.class);
-                startActivity(intent);
-
-                // Ukrywamy dymek z powrotem, żeby był gotowy na następny raz
-                if (purrfectDialog != null) {
-                    purrfectDialog.setVisibility(View.INVISIBLE);
+            // --- Kliknięcie checkbox / paw ---
+            checkbox.setOnClickListener(v -> {
+                if ("completed".equals(task.status)) {
+                    task.status = "not finished";
+                    tvTitle.setPaintFlags(tvTitle.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                    checkbox.setImageResource(R.drawable.custom_checkbox_shape);
+                } else {
+                    task.status = "completed";
+                    tvTitle.setPaintFlags(tvTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                    checkbox.setImageResource(R.drawable.paw_icon);
                 }
-            }, 800);
-        });
+                taskDao.update(task);
+            });
 
-        // --- 4. OBSŁUGA ZADAŃ (PRZEKREŚLANIE I EDYCJA) ---
-        setupTaskRow(R.id.taskRow1);
-        setupTaskRow(R.id.taskRow2);
-        setupTaskRow(R.id.taskRow3);
-    }
+            // --- Kliknięcie w trzy kropki -> edycja ---
+            ivEdit.setOnClickListener(v -> {
+                Intent intent = new Intent(this, EditTaskActivity.class);
+                intent.putExtra("taskId", task.id);
+                startActivity(intent);
+            });
 
-    private void setupTaskRow(int rowId) {
-        View row = findViewById(rowId);
-        if (row == null) return;
-
-        // Wyciągamy elementy: index 0 to more_icon, 1 to checkbox, 2 to text
-        ImageView moreIcon = (ImageView) ((android.view.ViewGroup) row).getChildAt(0);
-        View checkbox = ((android.view.ViewGroup) row).getChildAt(1);
-        TextView taskText = (TextView) ((android.view.ViewGroup) row).getChildAt(2);
-
-        // Ikona kropek -> Edycja zadania
-        moreIcon.setOnClickListener(v -> {
-            Intent intent = new Intent(TaskListActivity.this, EditTaskActivity.class);
-            startActivity(intent);
-        });
-
-        // Kliknięcie w kwadrat -> Przekreślenie czarne + łapka
-        checkbox.setOnClickListener(v -> {
-            // Przekreślenie
-            taskText.setPaintFlags(taskText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            // Upewniamy się, że kolor zostaje czarny
-            taskText.setTextColor(Color.BLACK);
-            // Podmiana tła kwadratu na ikonę łapki
-            checkbox.setBackgroundResource(R.drawable.paw_icon);
-        });
-    }
-
-    // Funkcja generująca datę: np. 25th of Dec, 2025
-    private String getFormattedDate() {
-        Calendar cal = Calendar.getInstance();
-        int day = cal.get(Calendar.DAY_OF_MONTH);
-
-        String dayWithSuffix = day + getDaySuffix(day);
-        String monthAndYear = new SimpleDateFormat(" 'of' MMM, yyyy", Locale.ENGLISH).format(cal.getTime());
-
-        return dayWithSuffix + monthAndYear;
-    }
-
-    private String getDaySuffix(int n) {
-        if (n >= 11 && n <= 13) return "th";
-        switch (n % 10) {
-            case 1:  return "st";
-            case 2:  return "nd";
-            case 3:  return "rd";
-            default: return "th";
+            todayTasksContainer.addView(taskView);
         }
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadTasksForToday(); // odśwież po powrocie z NewTaskActivity/EditTaskActivity
+    }
 }
+

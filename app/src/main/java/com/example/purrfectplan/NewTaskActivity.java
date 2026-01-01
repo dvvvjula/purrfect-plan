@@ -4,13 +4,13 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -20,10 +20,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+
+import com.example.purrfectplan.room.AppDatabase;
+import com.example.purrfectplan.room.TaskEntity;
 
 public class NewTaskActivity extends AppCompatActivity {
 
@@ -94,10 +98,38 @@ public class NewTaskActivity extends AppCompatActivity {
 
 
     private void saveTaskToRoom() {
-        // Logika zapisu do bazy Room
-        Toast.makeText(this, "Task saved to your meow-list!", Toast.LENGTH_SHORT).show();
+
+        // 1. Pobranie tekstu z pól
+        EditText etTitle = findViewById(R.id.etTitle);
+        EditText etDesc = findViewById(R.id.etDesc);
+        Spinner spinner = findViewById(R.id.statusSpinner);
+        SwitchCompat switchNotify = findViewById(R.id.switchNotify);
+
+        String title = etTitle.getText().toString();
+        String description = etDesc.getText().toString();
+        String status = spinner.getSelectedItem().toString();
+        boolean notify = switchNotify.isChecked();
+
+        // 2. Data i godzina (z Calendar) – zapisujemy jako long
+        long dateTime = selectedDateTime.getTimeInMillis();
+
+        // 3. Tworzenie obiektu TaskEntity
+        TaskEntity task = new TaskEntity();
+        task.title = title;
+        task.description = description;
+        task.dateTime = dateTime; // <-- używamy dateTime zamiast date + time
+        task.status = status;
+        task.notify = notify;
+
+        // 4. Zapis do Room
+        AppDatabase.getInstance(this).taskDao().insert(task);
+
+        // 5. Info + powrót
+        Toast.makeText(this, "Task saved 🐾", Toast.LENGTH_SHORT).show();
         finish();
     }
+
+
 
     // ADAPTER JAKO KLASA WEWNĘTRZNA (Poprawiona)
     public class StatusAdapter extends ArrayAdapter<String> {
